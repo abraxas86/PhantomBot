@@ -112,11 +112,18 @@
     /**
      * @function say
      * @export $
-     * @param {string} message
+     * @param {string} message, {integer} delay
      */
-    function say(message) {
+    function say(message,delay) {
+        
+        var sendMessage = false;
+
         if (message === undefined || message === null) {
             return;
+        }
+        //delay function
+        if (delay === undefined || delay === null){
+            delay = 0;
         }
         message = $.jsString(message);
         if (message.trim().length === 0 || reg.test(message)) {
@@ -124,14 +131,15 @@
         }
 
         if (respond && !action) {
-            Packages.tv.phantombot.PhantomBot.instance().getSession().say(message);
+            sendMessage = true;
         } else {
             if (respond && action) {
                 // If the message is a Twitch command, remove the /me.
                 if (message.startsWith('.') || message.startsWith('/')) {
-                    Packages.tv.phantombot.PhantomBot.instance().getSession().say(message);
+                    sendMessage = true;
                 } else {
-                    Packages.tv.phantombot.PhantomBot.instance().getSession().say('/me ' + message);
+                    sendMessage = true;
+                    message = '/me' + message;
                 }
             }
             if (!respond) {
@@ -140,6 +148,12 @@
                 return;
             }
         }
+
+        if (sendMessage === true){
+            var sendMsg = function() { Packages.tv.phantombot.PhantomBot.instance().getSession().say(message); }
+            setTimeout(sendMsg,delay);
+        }
+
         $.log.file('chat', '' + $.botName.toLowerCase() + ': ' + message);
     }
 
